@@ -5,9 +5,10 @@ import {
     PokemonAPIError,
     searchPokemon,
     subscribeToLoadingState
-} from './api/services/pokemonApi.js'
+} from "./api/services/pokemonApi.js"
 import SearchBar from './pages/SearchBar'
 import './App.css'
+import PokemonCard from "./components/PokemonCard.tsx";
 
 // Interface for Pokemon data structure
 interface Pokemon {
@@ -120,6 +121,9 @@ function App() {
         }
     };
 
+    const handleImageError = (pokemonName: string) => {
+        console.warn(`Failed to load image for Pokemon: ${pokemonName}`);
+    };
     return (
         <>
             <h1>Pokemon Search App</h1>
@@ -193,147 +197,11 @@ function App() {
 
             {/* Pokemon display */}
             {pokemon && !loadingStates.searchPokemon && (
-                <div className="pokemon-card" style={{
-                    border: '2px solid #007bff',
-                    borderRadius: '12px',
-                    padding: '1.5rem',
-                    margin: '1.5rem auto',
-                    textAlign: 'center',
-                    maxWidth: '500px',
-                    backgroundColor: '#f8f9fa',
-                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-                }}>
-                    <h2 style={{
-                        textTransform: 'capitalize',
-                        color: '#007bff',
-                        marginBottom: '1rem'
-                    }}>
-                        {pokemon.name} #{pokemon.id}
-                    </h2>
-
-                    {pokemon.sprites.front_default && (
-                        <div style={{marginBottom: '1rem'}}>
-                            <img
-                                src={pokemon.sprites.front_default}
-                                alt={pokemon.name}
-                                style={{
-                                    width: '150px',
-                                    height: '150px',
-                                    imageRendering: 'pixelated'
-                                }}
-                            />
-                        </div>
-                    )}
-
-                    <div className="pokemon-info">
-                        <div className="basic-info" style={{
-                            display: 'grid',
-                            gridTemplateColumns: 'repeat(3, 1fr)',
-                            gap: '1rem',
-                            marginBottom: '1rem'
-                        }}>
-                            <div>
-                                <strong>Height:</strong><br/>
-                                {pokemon.height / 10} m
-                            </div>
-                            <div>
-                                <strong>Weight:</strong><br/>
-                                {pokemon.weight / 10} kg
-                            </div>
-                            <div>
-                                <strong>Base Experience:</strong><br/>
-                                {pokemon.base_experience}
-                            </div>
-                        </div>
-
-                        <div className="types" style={{marginBottom: '1rem'}}>
-                            <strong>Types: </strong>
-                            {pokemon.types.map((typeInfo, index) => (
-                                <span
-                                    key={index}
-                                    style={{
-                                        backgroundColor: getTypeColor(typeInfo.type.name),
-                                        color: 'white',
-                                        padding: '0.3rem 0.8rem',
-                                        borderRadius: '20px',
-                                        margin: '0 0.25rem',
-                                        textTransform: 'capitalize',
-                                        fontSize: '0.9rem',
-                                        fontWeight: 'bold'
-                                    }}
-                                >
-                  {typeInfo.type.name}
-                </span>
-                            ))}
-                        </div>
-
-                        <div className="abilities">
-                            <strong>Abilities: </strong>
-                            <div style={{marginTop: '0.5rem'}}>
-                                {pokemon.abilities.map((abilityInfo, index) => (
-                                    <span
-                                        key={index}
-                                        style={{
-                                            textTransform: 'capitalize',
-                                            backgroundColor: '#e9ecef',
-                                            padding: '0.2rem 0.5rem',
-                                            borderRadius: '12px',
-                                            margin: '0.2rem',
-                                            display: 'inline-block'
-                                        }}
-                                    >
-                    {abilityInfo.ability.name}
-                  </span>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Stats */}
-                        <div className="stats" style={{marginTop: '1rem'}}>
-                            <strong>Base Stats:</strong>
-                            <div style={{marginTop: '0.5rem', textAlign: 'left'}}>
-                                {pokemon.stats.map((statInfo, index) => (
-                                    <div key={index} style={{
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        marginBottom: '0.3rem'
-                                    }}>
-                    <span style={{
-                        minWidth: '120px',
-                        textTransform: 'capitalize',
-                        fontSize: '0.9rem'
-                    }}>
-                      {statInfo.stat.name.replace('-', ' ')}:
-                    </span>
-                                        <span style={{
-                                            minWidth: '40px',
-                                            textAlign: 'right',
-                                            marginRight: '0.5rem',
-                                            fontWeight: 'bold'
-                                        }}>
-                      {statInfo.base_stat}
-                    </span>
-                                        <div style={{
-                                            flex: 1,
-                                            height: '8px',
-                                            backgroundColor: '#e9ecef',
-                                            borderRadius: '4px',
-                                            overflow: 'hidden'
-                                        }}>
-                                            <div style={{
-                                                height: '100%',
-                                                width: `${Math.min((statInfo.base_stat / 200) * 100, 100)}%`,
-                                                backgroundColor: getStatColor(statInfo.base_stat),
-                                                borderRadius: '4px',
-                                                transition: 'width 0.3s ease'
-                                            }}></div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <PokemonCard
+                    pokemon={pokemon}
+                    showShinyToggle={true}
+                    onImageError={handleImageError}
+                />
             )}
 
             {/* Search info */}
@@ -378,38 +246,5 @@ function App() {
         </>
     )
 }
-
-// Helper function to get type-specific colors
-const getTypeColor = (type: string): string => {
-    const typeColors: { [key: string]: string } = {
-        fire: '#F08030',
-        water: '#6890F0',
-        electric: '#F8D030',
-        grass: '#78C850',
-        ice: '#98D8D8',
-        fighting: '#C03028',
-        poison: '#A040A0',
-        ground: '#E0C068',
-        flying: '#A890F0',
-        psychic: '#F85888',
-        bug: '#A8B820',
-        rock: '#B8A038',
-        ghost: '#705898',
-        dragon: '#7038F8',
-        dark: '#705848',
-        steel: '#B8B8D0',
-        fairy: '#EE99AC',
-        normal: '#A8A878'
-    };
-    return typeColors[type] || '#68A090';
-};
-
-// Helper function to get stat-specific colors
-const getStatColor = (statValue: number): string => {
-    if (statValue >= 100) return '#4CAF50'; // Green for high stats
-    if (statValue >= 70) return '#FF9800'; // Orange for medium stats
-    if (statValue >= 40) return '#2196F3'; // Blue for low-medium stats
-    return '#F44336'; // Red for low stats
-};
 
 export default App
